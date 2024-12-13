@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spotify Wrapped 2024</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #1E2A47;
+            color: #f1f1f1;
+            margin: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #1DB954;
+            margin-bottom: 30px;
+        }
+
+        .logo-container {
+            position: absolute;
+            top: -70px;
+            right: 20px;
+        }
+
+/* Disable hover effect for the left-side cells and retain default background color */
+.table-container td:first-child {
+    pointer-events: none; /* Disable hover interactions */
+    background-color: #333; /* Ensure it keeps the default gray background */
+}
+
+/* Apply hover effect only to the right-side cells */
+.table-container td:not(:first-child):hover {
+    background-color: #8B0000; /* Dark red color */
+}
+        .logo-container img {
+            width: 180px;
+            height: auto;
+        }
+
+        .section-container {
+            margin: 40px 0;
+            background-color: #2A3C69;
+            padding: 20px;
+            border-radius: 8px;
+        }
+
+        .section-container h2 {
+            margin-bottom: 20px;
+            font-size: 1.8em;
+            color: #FF69B4;
+            text-align: center;
+        }
+
+        .slider-container {
+            position: relative;
+            width: 100%;
+            height: 600px;
+            overflow: hidden;
+        }
+
+        .graph {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .overlay {
+            z-index: 1;
+            clip-path: inset(100% 0 0 0);
+        }
+
+        .slider {
+            position: absolute;
+            height: 5px;
+            width: 100%; /* Green bar spans horizontally */
+            background: #1DB954;
+            cursor: ns-resize;
+            z-index: 2;
+            left: 0; /* Fixed at the left of the container */
+        }
+
+        .watermark {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 14em;
+            color: rgba(150, 150, 150, 0.3);
+            pointer-events: none;
+            text-align: center;
+            z-index: 0;
+            user-select: none;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            color: #fff;
+        }
+
+        th, td {
+            padding: 10px;
+            text-align: center;
+            border: 1px solid #444;
+        }
+
+        th {
+            background-color: #1DB954;
+        }
+
+        td {
+            background-color: #333;
+        }
+
+        #hover-box {
+            position: absolute;
+            background-color: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 10px;
+            border-radius: 4px;
+            display: none;
+            z-index: 10;
+            font-size: 14px;
+	    display: flex; /* Enables flexbox */
+  	    justify-content: center; /* Centers horizontally */
+   	    align-items: center; /* Centers vertically */
+    	    text-align: center; /* Ensures text alignment is centered */
+    	    flex-direction: column; /* Stacks content vertically */
+        }
+    </style>
+</head>
+<body>
+    <div class="logo-container" style="position: absolute; top: -30px; left: 10px;">
+        <img src="/static/images/spotify_logo.png" alt="Spotify Logo" style="width: 220px; height: auto;">
+    </div>
+
+    <h1 style="text-align: center; color: #1DB954; margin-top: 100px; margin-bottom: 35px;">
+        Welcome to Aiden's 2024 Spotify Wrapped
+    </h1>
+    
+    <!-- Total Minutes Section -->
+    <div class="section-container">
+        <h2>Total Minutes Streamed in 2024</h2>
+        <div style="font-size: 2.5em; text-align: center;"
+             onmouseover="showComparison(event)"
+             onmouseout="hideComparison()">
+            {{ total_minutes_comparison['2024 Total Minutes'] }} minutes
+        </div>
+        <div id="hover-box"></div>
+    </div>
+
+  <!-- Top 30 Songs -->
+<div class="section-container">
+    <h2>Top 30 Songs: Compare 2024 and 2023</h2>
+    <div style="text-align: center; font-size: 1em; margin-top: -10px; margin-bottom: 20px; color: #FF69B4;">
+        Slide bar for year-to-year comparison
+    </div>
+    <div class="slider-container">
+        <div id="top_30_songs_2024" class="graph">
+            {{ top_30_songs_graph_2024|safe }}
+            <div class="watermark">2024</div>
+        </div>
+        <div id="top_30_songs_2023" class="graph overlay">
+            {{ top_30_songs_graph_2023|safe }}
+            <div class="watermark">2023</div>
+        </div>
+        <div class="slider" id="slider-songs"></div>
+    </div>
+</div>
+
+<!-- Top 20 Artists -->
+<div class="section-container">
+    <h2>Top 20 Artists: Compare 2024 and 2023</h2>
+    <div style="text-align: center; font-size: 1em; margin-top: -10px; margin-bottom: 20px; color: #FF69B4;">
+        Slide bar for year-to-year comparison
+    </div>
+    <div class="slider-container">
+        <div id="top_25_artists_2024" class="graph">
+            {{ top_25_artists_graph_2024|safe }}
+            <div class="watermark">2024</div>
+        </div>
+        <div id="top_25_artists_2023" class="graph overlay">
+            {{ top_25_artists_graph_2023|safe }}
+            <div class="watermark">2023</div>
+        </div>
+        <div class="slider" id="slider-artists"></div>
+    </div>
+</div>
+
+
+    <!-- Top Artists Per Month -->
+    <div class="section-container">
+        <h2>Top Artists Per Month in 2024</h2>
+        <div class="chart-container">
+            <div id="top_artists_per_month">
+                {{ top_artists_per_month_graph|safe }}
+            </div>
+        </div>
+    </div>
+
+    <!-- Monthly Listening Times Table -->
+    <div class="section-container">
+        <h2>Monthly Listening Times in 2024</h2>
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Month</th>
+                        <th>Minutes Played</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for month in monthly_minutes_2024 %}
+                    <tr>
+                        <td>{{ month['Month'] }}</td>
+                        <td onmouseover="showMonthlyComparison(event, {{ month['Difference'] }}, {{ month['Percentage Change'] }})"
+                            onmouseout="hideComparison()">
+                            {{ month['Minutes Played'] }}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        function showComparison(event) {
+            const box = document.getElementById("hover-box");
+            box.innerText = `Difference: {{ total_minutes_comparison['Difference'] }} minutes\nPercentage Change: {{ total_minutes_comparison['Percentage Change'] }}%`;
+            box.style.display = "block";
+            box.style.left = `${event.pageX + 10}px`;
+            box.style.top = `${event.pageY + 10}px`;
+        }
+
+        function showMonthlyComparison(event, diff, percent) {
+    const box = document.getElementById("hover-box");
+    box.innerHTML = `
+        <div><strong>Difference from 2023</strong></div>
+        <div>${diff} minutes</div>
+        <div>${percent}%</div>
+    `;
+    box.style.display = "block";
+    box.style.left = `${event.pageX + 10}px`;
+    box.style.top = `${event.pageY + 10}px`;
+}
+
+function hideComparison() {
+    const box = document.getElementById("hover-box");
+    box.style.display = "none";
+}
+
+       function createVerticalSlider(sliderId, overlayId) {
+    const slider = document.getElementById(sliderId);
+    const overlay = document.getElementById(overlayId);
+
+    // Initial position: slider starts at 15% of the graph height
+    const initialPosition = 7;
+    slider.style.top = `${initialPosition}%`;
+    overlay.style.clipPath = `inset(0 0 ${100 - initialPosition}% 0)`; // 85% of 2024 graph visible initially
+
+    let isDragging = false;
+
+    slider.addEventListener("mousedown", () => {
+        isDragging = true;
+    });
+
+    document.addEventListener("mouseup", () => {
+        isDragging = false;
+    });
+
+    document.addEventListener("mousemove", (e) => {
+        if (isDragging) {
+            const container = slider.parentElement;
+            const rect = container.getBoundingClientRect();
+            const y = e.clientY - rect.top;
+
+            // Calculate the percentage of the slider's position
+            const percentage = Math.min(Math.max((y / rect.height) * 100, 0), 100);
+
+            slider.style.top = `${percentage}%`; // Move slider vertically
+            overlay.style.clipPath = `inset(0 0 ${100 - percentage}% 0)`; // Reveal 2023 progressively as the slider moves down
+        }
+    });
+}
+
+
+
+
+        createVerticalSlider("slider-songs", "top_30_songs_2023");
+        createVerticalSlider("slider-artists", "top_25_artists_2023");
+    </script>
+</body>
+</html>
