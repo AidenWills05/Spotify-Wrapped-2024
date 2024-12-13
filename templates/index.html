@@ -132,7 +132,22 @@
     	    text-align: center; /* Ensures text alignment is centered */
     	    flex-direction: column; /* Stacks content vertically */
         }
-    </style>
+    <style>
+    #hover-box {
+        position: absolute;
+        background-color: rgba(0, 0, 0, 0.8); /* Solid black background */
+        color: white;
+        padding: 10px;
+        border-radius: 4px;
+        display: none;
+        z-index: 10;
+        font-size: 14px;
+        text-align: center; /* Center text inside the hover box */
+        line-height: 1.5; /* Space between lines */
+        pointer-events: none; /* Prevent interaction */
+    }
+</style>
+
 </head>
 <body>
     <div class="logo-container" style="position: absolute; top: -30px; left: 10px;">
@@ -204,94 +219,110 @@
     </div>
 
     <!-- Monthly Listening Times Table -->
-    <div class="section-container">
-        <h2>Monthly Listening Times in 2024</h2>
-        <div class="table-container">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Month</th>
-                        <th>Minutes Played</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for month in monthly_minutes_2024 %}
-                    <tr>
-                        <td>{{ month['Month'] }}</td>
-                        <td onmouseover="showMonthlyComparison(event, {{ month['Difference'] }}, {{ month['Percentage Change'] }})"
-                            onmouseout="hideComparison()">
-                            {{ month['Minutes Played'] }}
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
+<div class="section-container">
+    <h2>Monthly Listening Times in 2024</h2>
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>Month</th>
+                    <th>Minutes Played</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for month in monthly_minutes_2024 %}
+                <tr>
+                    <td>{{ month['Month'] }}</td>
+                    <td 
+                        onmouseover="showMonthlyComparison(event, {{ month['Difference'] }}, {{ month['Percentage Change'] }})"
+                        onmouseout="hideComparison()">
+                        {{ month['Minutes Played'] }}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
     </div>
+    <div id="hover-box"></div> <!-- Hover box for displaying the difference -->
+</div>
+
 
     <script>
-        function showComparison(event) {
-    const box = document.getElementById("hover-box");
-    box.innerText = `Difference from 2023\nDifference: {{ total_minutes_comparison['Difference'] }} minutes\nPercentage Change: {{ total_minutes_comparison['Percentage Change'] }}%`;
-    box.style.display = "block";
-    box.style.left = `${event.pageX + 10}px`;
-    box.style.top = `${event.pageY + 10}px`;
-}
+    // Function to show the hover box for Monthly Listening Times
+    function showMonthlyComparison(event, diff, percent) {
+        const box = document.getElementById("hover-box");
+        box.innerHTML = `
+            <strong>Difference from 2023</strong><br>
+            ${diff} minutes<br>
+            ${percent}%`;
+        box.style.display = "block";
+        box.style.left = `${event.pageX + 10}px`; // Position near the cursor
+        box.style.top = `${event.pageY + 10}px`; // Position near the cursor
+    }
 
+    // Function to hide the hover box
+    function hideComparison() {
+        const box = document.getElementById("hover-box");
+        box.style.display = "none";
+    }
 
-        function showComparison(event) {
-    const box = document.getElementById("hover-box");
-    box.innerHTML = `<strong>Difference from 2023</strong><br>{{ total_minutes_comparison['Difference'] }} minutes<br>{{ total_minutes_comparison['Percentage Change'] }}%`;
-    box.style.display = "block";
-    box.style.left = `${event.pageX + 10}px`;
-    box.style.top = `${event.pageY + 10}px`;
-}
+    // Function to show the hover box for Total Minutes
+    function showComparison(event) {
+        const box = document.getElementById("hover-box");
+        box.innerHTML = `
+            <strong>Difference from 2023</strong><br>
+            {{ total_minutes_comparison['Difference'] }} minutes<br>
+            {{ total_minutes_comparison['Percentage Change'] }}%`;
+        box.style.display = "block";
+        box.style.left = `${event.pageX + 10}px`; // Position near the cursor
+        box.style.top = `${event.pageY + 10}px`; // Position near the cursor
+    }
 
+    // Function to hide the hover box
+    function hideComparison() {
+        const box = document.getElementById("hover-box");
+        box.style.display = "none";
+    }
 
-function hideComparison() {
-    const box = document.getElementById("hover-box");
-    box.style.display = "none";
-}
+    // Function to create vertical slider for graphs
+    function createVerticalSlider(sliderId, overlayId) {
+        const slider = document.getElementById(sliderId);
+        const overlay = document.getElementById(overlayId);
 
-       function createVerticalSlider(sliderId, overlayId) {
-    const slider = document.getElementById(sliderId);
-    const overlay = document.getElementById(overlayId);
+        // Initial position: slider starts at 15% of the graph height
+        const initialPosition = 7;
+        slider.style.top = `${initialPosition}%`;
+        overlay.style.clipPath = `inset(0 0 ${100 - initialPosition}% 0)`; // 85% of 2024 graph visible initially
 
-    // Initial position: slider starts at 15% of the graph height
-    const initialPosition = 7;
-    slider.style.top = `${initialPosition}%`;
-    overlay.style.clipPath = `inset(0 0 ${100 - initialPosition}% 0)`; // 85% of 2024 graph visible initially
+        let isDragging = false;
 
-    let isDragging = false;
+        slider.addEventListener("mousedown", () => {
+            isDragging = true;
+        });
 
-    slider.addEventListener("mousedown", () => {
-        isDragging = true;
-    });
+        document.addEventListener("mouseup", () => {
+            isDragging = false;
+        });
 
-    document.addEventListener("mouseup", () => {
-        isDragging = false;
-    });
+        document.addEventListener("mousemove", (e) => {
+            if (isDragging) {
+                const container = slider.parentElement;
+                const rect = container.getBoundingClientRect();
+                const y = e.clientY - rect.top;
 
-    document.addEventListener("mousemove", (e) => {
-        if (isDragging) {
-            const container = slider.parentElement;
-            const rect = container.getBoundingClientRect();
-            const y = e.clientY - rect.top;
+                // Calculate the percentage of the slider's position
+                const percentage = Math.min(Math.max((y / rect.height) * 100, 0), 100);
 
-            // Calculate the percentage of the slider's position
-            const percentage = Math.min(Math.max((y / rect.height) * 100, 0), 100);
+                slider.style.top = `${percentage}%`; // Move slider vertically
+                overlay.style.clipPath = `inset(0 0 ${100 - percentage}% 0)`; // Reveal 2023 progressively as the slider moves down
+            }
+        });
+    }
 
-            slider.style.top = `${percentage}%`; // Move slider vertically
-            overlay.style.clipPath = `inset(0 0 ${100 - percentage}% 0)`; // Reveal 2023 progressively as the slider moves down
-        }
-    });
-}
+    // Initialize sliders for the graphs
+    createVerticalSlider("slider-songs", "top_30_songs_2023");
+    createVerticalSlider("slider-artists", "top_25_artists_2023");
+</script>
 
-
-
-
-        createVerticalSlider("slider-songs", "top_30_songs_2023");
-        createVerticalSlider("slider-artists", "top_25_artists_2023");
-    </script>
 </body>
 </html>
