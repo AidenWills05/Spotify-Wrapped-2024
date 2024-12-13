@@ -231,12 +231,13 @@
 
     <script>
         function showComparison(event) {
-            const box = document.getElementById("hover-box");
-            box.innerText = `Difference: {{ total_minutes_comparison['Difference'] }} minutes\nPercentage Change: {{ total_minutes_comparison['Percentage Change'] }}%`;
-            box.style.display = "block";
-            box.style.left = `${event.pageX + 10}px`;
-            box.style.top = `${event.pageY + 10}px`;
-        }
+    const box = document.getElementById("hover-box");
+    box.innerText = `Difference from 2023\nDifference: {{ total_minutes_comparison['Difference'] }} minutes\nPercentage Change: {{ total_minutes_comparison['Percentage Change'] }}%`;
+    box.style.display = "block";
+    box.style.left = `${event.pageX + 10}px`;
+    box.style.top = `${event.pageY + 10}px`;
+}
+
 
         function showMonthlyComparison(event, diff, percent) {
     const box = document.getElementById("hover-box");
