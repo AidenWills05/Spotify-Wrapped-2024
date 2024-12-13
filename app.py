@@ -54,8 +54,8 @@ def index():
 
     total_minutes_comparison = {
         '2024 Total Minutes': total_minutes_2024,
-        : diff,
-        : round(percentage_change, 2),
+        'Difference': diff,
+        'Percentage Change': round(percentage_change, 2),
     }
 
     # Monthly Listening Times Data

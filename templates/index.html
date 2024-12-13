@@ -239,17 +239,14 @@
 }
 
 
-        function showMonthlyComparison(event, diff, percent) {
+        function showComparison(event) {
     const box = document.getElementById("hover-box");
-    box.innerHTML = `
-        <div><strong>Difference from 2023</strong></div>
-        <div>${diff} minutes</div>
-        <div>${percent}%</div>
-    `;
+    box.innerHTML = `<strong>Difference from 2023</strong><br>{{ total_minutes_comparison['Difference'] }} minutes<br>{{ total_minutes_comparison['Percentage Change'] }}%`;
     box.style.display = "block";
     box.style.left = `${event.pageX + 10}px`;
     box.style.top = `${event.pageY + 10}px`;
 }
+
 
 function hideComparison() {
     const box = document.getElementById("hover-box");
